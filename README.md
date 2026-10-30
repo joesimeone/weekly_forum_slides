@@ -16,5 +16,5 @@ quarto render git_in_a_nutshell.qmd
 
 - [Happy with git R | Jennifer Bryan](https://happygitwithr.com/)
 - [MIT Missing Semester Post on git](https://missing.csail.mit.edu/2026/version-control/)
-
+- [Repo from a 2024 positconf talk by Megan Saha](https://github.com/Meghansaha/please_let_me_merge), which has so, so many resources 
 
