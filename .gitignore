@@ -1,0 +1,9 @@
+# Rendered output
+*.html
+
+# Quarto
+/.quarto/
+*_files/
+
+# OS
+.DS_Store

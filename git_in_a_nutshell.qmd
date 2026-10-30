@@ -1,0 +1,648 @@
+---
+title: "Things I wish someone had told me about Git"
+subtitle: "*Ways to wade through the computer nonsense that research forces you to learn*"
+author:
+  - Joe Simeone
+  - "Theme by [Grant McDermott](https://github.com/grantmcdermott/quarto-revealjs-clean)"
+  - "Diagrams by 🤖"
+format:
+  revealjs:
+    theme: [default, forum.scss]
+    width: 1280
+    height: 720
+    margin: 0.08
+    slide-number: true
+    embed-resources: true
+---
+
+## Outline 
+
+:::: {.columns}
+::: {.column width="55%"}
+:::{.incremental}
+
+1. Git in 10-minutes
+2. Squash & merge workflows
+3. Worktrees & Agentic AI
+::: 
+:::
+
+::: {.column .comic width="45%"}
+![](git_comic.png){fig-alt="xkcd comic. One person says: this is Git, it tracks collaborative work on projects through a beautiful distributed graph theory tree model. Another asks how to use it. The answer: no idea, just memorize these shell commands and type them to sync up. If you get errors, save your work elsewhere, delete the project, and download a fresh copy."}
+
+[xkcd.com/1597]{.muted}
+:::
+::::
+
+## What's git all about? 
+
+At its core, git allows you to track the work that you do across time. Imagine an essay:
+
+::: {.fragment}
+```{=html}
+<svg class="git" viewBox="0 0 1000 170" role="img" aria-label="Five commits in a row: sections 1 to 2, sections 3 to 5, intro and conclusion, draft 1, draft 2">
+  <path class="ln main" d="M100,80 H900"/>
+  <circle class="nd main" cx="100" cy="80" r="16"/>
+  <circle class="nd main" cx="300" cy="80" r="16"/>
+  <circle class="nd main" cx="500" cy="80" r="16"/>
+  <circle class="nd main" cx="700" cy="80" r="16"/>
+  <circle class="nd main" cx="900" cy="80" r="16"/>
+  <text class="id" x="100" y="44">C1</text>
+  <text class="id" x="300" y="44">C2</text>
+  <text class="id" x="500" y="44">C3</text>
+  <text class="id" x="700" y="44">C4</text>
+  <text class="id" x="900" y="44">C5</text>
+  <text class="cap" x="100" y="130">Sections 1–2</text>
+  <text class="cap" x="300" y="130">Sections 3–5</text>
+  <text class="cap" x="500" y="130">Intro + conclusion</text>
+  <text class="tag t-main" x="700" y="130">Draft 1</text>
+  <text class="tag t-main" x="900" y="130">Draft 2</text>
+</svg>
+```
+:::
+
+
+
+## A commit is one unit of work
+
+In our example, one piece of the essay.
+
+::: {.steps}
+::: {.step}
+[Stage]{.card-title}\
+[command line]{.cli} `git add`
+
+"This work is ready to be checked in."
+:::
+
+[→]{.arrow}
+
+::: {.step}
+[Commit]{.card-title}\
+[command line]{.cli} `git commit`
+
+"Track this piece for eternity."
+:::
+
+[→]{.arrow}
+
+::: {.step}
+[Push]{.card-title}\
+[command line]{.cli} `git push`
+
+"This should live in a remote place (online, like GitHub)."
+:::
+:::
+
+::: {.notes}
+Commit = 1 "unit" of work, in this case a section.
+
+When you add or stage a commit, you're saying that this work is ready to be checked in.
+
+When you actually commit, you're saying track this piece for eternity.
+
+When you push this commit, you're saying this should live in a remote place (online).
+:::
+
+::: {.fragment}
+
+Because **commits** are (sort of) eternal, we don't want to commit everything in a project. API keys & credentials, most data, and anything that can be rebuilt by your code should be added to a **.gitignore** file. This prevents files from being tracked. 
+
+:::
+
+## Working this way has lots of advantages
+
+::::: {.r-stack .adv}
+:::: {.fragment .fade-out fragment-index=0}
+**Switch between project states** without saving a bunch of different versions. Draft 1 and Draft 2 are the same file.
+
+```{=html}
+<pre class="tree">essay
+├── essay.docx
+├── essay_v2.docx
+├── essay_final.docx
+├── essay_final_final.docx
+├── essay_final_final_v2.docx
+├── essay_FINAL_use_this_one.docx
+└── essay_final_final_final (1).docx</pre>
+```
+
+[Avoids this.]{.mess}
+::::
+
+:::: {.fragment .fade-in-then-out fragment-index=0}
+**Want to revisit an earlier version of your essay?** Navigate back to an earlier commit.
+
+```{=html}
+<svg class="git" viewBox="0 0 1000 230" role="img" aria-label="An arrow travels back from commit C5, Draft 2, to commit C2, before the conclusion was written">
+  <path class="ln main" d="M100,140 H900"/>
+  <path class="ln br" d="M900,116 C900,20 300,20 300,100"/>
+  <polygon class="head br" points="300,120 290,102 310,102"/>
+  <circle class="nd main" cx="100" cy="140" r="16"/>
+  <circle class="nd main" cx="300" cy="140" r="16"/>
+  <circle class="nd main" cx="500" cy="140" r="16"/>
+  <circle class="nd main" cx="700" cy="140" r="16"/>
+  <circle class="nd main" cx="900" cy="140" r="16"/>
+  <text class="tag t-br" x="600" y="22">back in time</text>
+  <text class="id" x="100" y="186">C1</text>
+  <text class="id" x="300" y="186">C2</text>
+  <text class="id" x="500" y="186">C3</text>
+  <text class="id" x="700" y="186">C4</text>
+  <text class="id" x="900" y="186">C5</text>
+  <text class="cap" x="100" y="216">Sections 1–2</text>
+  <text class="cap" x="300" y="216">Sections 3–5</text>
+  <text class="cap" x="500" y="216">Intro + conclusion</text>
+  <text class="cap" x="700" y="216">Draft 1</text>
+  <text class="cap" x="900" y="216">Draft 2</text>
+</svg>
+```
+
+::: {.cmd}
+[command line]{.cli}\
+`git checkout C2` [look at the essay as it was]{.muted}\
+`git restore --source C2 essay.docx` [bring an old version forward]{.muted}\
+`git revert C3` [undo one commit, on top of where you are now]{.muted}
+:::
+
+::: {.caveat}
+*In research, navigating between versions of a codebase can mean recreating the exact code that **produced a result**. This is essential for reproducibility*. 
+:::
+::::
+
+:::: {.fragment .fade-in fragment-index=1}
+**Working with another person?** They can go to that remote place, get a copy of the same essay, and work on it in tandem.
+
+```{=html}
+<svg class="git" viewBox="0 0 1000 300" role="img" aria-label="You and a collaborator each push to and pull from the same remote copy on GitHub">
+  <defs>
+    <marker id="adv-arrow" viewBox="0 0 20 20" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="4" refY="10" orient="auto">
+      <path class="head main" d="M2,2 L18,10 L2,18 Z"/>
+    </marker>
+  </defs>
+  <rect class="box" x="370" y="20" width="260" height="80" rx="40"/>
+  <text class="tag t-br" x="500" y="56">GitHub</text>
+  <text class="cap" x="500" y="82">the remote copy</text>
+  <path class="ln main" marker-end="url(#adv-arrow)" d="M202,161 L348,78"/>
+  <path class="ln main" marker-end="url(#adv-arrow)" d="M364,106 L218,189"/>
+  <path class="ln main" marker-end="url(#adv-arrow)" d="M798,161 L652,78"/>
+  <path class="ln main" marker-end="url(#adv-arrow)" d="M636,106 L782,189"/>
+  <text class="cap mono end" x="252" y="106">git push</text>
+  <text class="cap mono start" x="318" y="170">git pull</text>
+  <text class="cap mono start" x="748" y="106">git push</text>
+  <text class="cap mono end" x="682" y="170">git pull</text>
+  <circle class="nd main" cx="150" cy="185" r="18"/>
+  <path class="ln main" d="M112,255 C112,215 188,215 188,255"/>
+  <circle class="nd main" cx="850" cy="185" r="18"/>
+  <path class="ln main" d="M812,255 C812,215 888,215 888,255"/>
+  <text class="tag t-main" x="150" y="290">you</text>
+  <text class="tag t-main" x="850" y="290">your collaborator</text>
+</svg>
+```
+::::
+:::::
+
+## Trying things out
+
+Maybe an advisor reads Draft 2 and says something like: "Have you thought about trying X? Not sure it will work, but it might be worth exploring.'' So: a [branch]{.branch}.
+
+```{=html}
+<svg class="git" viewBox="0 0 1000 270" role="img" aria-label="A branch of four new commits splitting off from commit C5, Draft 2">
+  <path class="ln main" d="M60,80 H620"/>
+  <path class="ln br" d="M620,80 C620,160 650,200 700,200 H970"/>
+  <circle class="nd main" cx="60" cy="80" r="16"/>
+  <circle class="nd main" cx="200" cy="80" r="16"/>
+  <circle class="nd main" cx="340" cy="80" r="16"/>
+  <circle class="nd main" cx="480" cy="80" r="16"/>
+  <circle class="nd main" cx="620" cy="80" r="16"/>
+  <circle class="nd br" cx="700" cy="200" r="16"/>
+  <circle class="nd br" cx="790" cy="200" r="16"/>
+  <circle class="nd br" cx="880" cy="200" r="16"/>
+  <circle class="nd br" cx="970" cy="200" r="16"/>
+  <text class="id" x="60" y="44">C1</text>
+  <text class="id" x="200" y="44">C2</text>
+  <text class="id" x="340" y="44">C3</text>
+  <text class="id" x="480" y="44">C4</text>
+  <text class="id" x="620" y="44">C5</text>
+  <text class="cap" x="480" y="18">Draft 1</text>
+  <text class="cap" x="620" y="18">Draft 2</text>
+  <text class="tag t-br" x="835" y="250">experimental sub-analysis</text>
+  <text class="cap end" x="590" y="198">a new series of commits to carry this out,</text>
+  <text class="cap end" x="590" y="224">quarantined from Draft 2</text>
+</svg>
+```
+
+::: {.cmd}
+[command line]{.cli} `git switch -c sub-analysis`
+:::
+
+::: {.notes}
+Let's say one of your collaborators, maybe a supervisor, reads draft 2 and says hey, have you tried this sub analysis? Not sure it will work, but might be worth exploring.
+
+New series of commits to carry this out, quarantined / separated from draft 2.
+:::
+
+## Either way, Draft 2 is safe
+
+:::: {.columns}
+::: {.column width="50%"}
+**If it works:** [merge it back]{.branch}
+
+```{=html}
+<svg class="git" viewBox="0 0 480 190" role="img" aria-label="The branch rejoins the main line in a merge commit">
+  <path class="ln main" d="M40,50 H430"/>
+  <path class="ln br" d="M220,50 C220,110 240,140 280,140 H350 C400,140 430,110 430,50"/>
+  <circle class="nd main" cx="40" cy="50" r="16"/>
+  <circle class="nd main" cx="130" cy="50" r="16"/>
+  <circle class="nd main" cx="220" cy="50" r="16"/>
+  <circle class="nd br" cx="280" cy="140" r="16"/>
+  <circle class="nd br" cx="350" cy="140" r="16"/>
+  <circle class="nd solid br" cx="430" cy="50" r="16"/>
+  <text class="cap" x="220" y="18">Draft 2</text>
+  <text class="cap end" x="450" y="18">now with sub-analysis</text>
+</svg>
+```
+
+::: {.cmd}
+[command line]{.cli}\
+`git switch main`\
+`git merge sub-analysis`
+:::
+:::
+
+::: {.column width="50%"}
+**If it doesn't:** [kill the branch]{.mess}
+
+```{=html}
+<svg class="git" viewBox="0 0 480 190" role="img" aria-label="The branch is abandoned and the main line carries on">
+  <path class="ln main" d="M40,50 H430"/>
+  <path class="ln gh" d="M220,50 C220,110 240,140 280,140 H350"/>
+  <circle class="nd main" cx="40" cy="50" r="16"/>
+  <circle class="nd main" cx="130" cy="50" r="16"/>
+  <circle class="nd main" cx="220" cy="50" r="16"/>
+  <circle class="nd main" cx="430" cy="50" r="16"/>
+  <circle class="nd gh" cx="280" cy="140" r="16"/>
+  <circle class="nd gh" cx="350" cy="140" r="16"/>
+  <text class="tag t-mess" x="400" y="148">✕</text>
+  <text class="cap end" x="450" y="18">keep it moving</text>
+  <text class="cap" x="220" y="18">Draft 2</text>
+</svg>
+```
+
+::: {.cmd}
+[command line]{.cli}\
+`git switch main`\
+`git branch -D sub-analysis`
+:::
+:::
+::::
+
+::: {.notes}
+If it works, merge it back. If it doesn't work, kill the branch / keep it moving.
+:::
+
+
+::: {.caveat}
+Branches are great for exploring ideas, updating code safely, and working with multiple people, but at times they can create some headaches. **Merge conflicts** arise when two branches change the same lines of the same file. Git can't tell which version to keep, so it pauses the merge and asks you to choose.
+:::
+
+## Adapting work to another purpose
+
+Maybe there's something novel in your paper that you want to share. Someone else can find it, and adapt it to their purposes with a [Fork]{.fork}.
+
+```{=html}
+<svg class="git" viewBox="0 0 1000 320" role="img" aria-label="Another scientist's copy of the repository forks off from yours and continues with its own commits">
+  <path class="ln main" d="M80,70 H640"/>
+  <path class="ln fk" d="M640,70 L760,220 H960"/>
+  <path class="ln fk" d="M860,220 C860,270 890,290 940,290"/>
+  <circle class="nd main" cx="80" cy="70" r="16"/>
+  <circle class="nd main" cx="220" cy="70" r="16"/>
+  <circle class="nd main" cx="360" cy="70" r="16"/>
+  <circle class="nd main" cx="500" cy="70" r="16"/>
+  <circle class="nd main" cx="640" cy="70" r="16"/>
+  <circle class="nd fk" cx="760" cy="220" r="16"/>
+  <circle class="nd fk" cx="860" cy="220" r="16"/>
+  <circle class="nd fk" cx="960" cy="220" r="16"/>
+  <circle class="nd fk" cx="940" cy="290" r="16"/>
+  <text class="tag t-main start" x="64" y="28">your paper</text>
+  <text class="tag t-fk end" x="660" y="160">Fork!</text>
+  <text class="cap end" x="672" y="188">(like in the road)</text>
+  <text class="cap end" x="985" y="184">their copy, their purpose</text>
+</svg>
+```
+
+::: {.cmd}
+[command line]{.cli} `gh repo fork you/your-paper --clone` [(GitHub's CLI; forking isn't part of git itself)]{.muted}
+:::
+
+::: {.notes}
+Last one for now. Let's say that there's like a... sparkling piece of math that can be retrieved from nowhere but your paper. Maybe another scientist wants to use it for a different purpose.
+
+Fork! (like in the road)
+:::
+
+## And that's Git... 
+
+::: {.wrapup}
+```{=html}
+<svg class="git" viewBox="0 0 1000 220" role="img" aria-label="The whole picture: a line of commits, a branch that splits off and merges back, and a fork that carries on as someone else's copy">
+  <path class="ln main" d="M60,60 H610"/>
+  <path class="ln br" d="M280,60 C280,110 300,140 340,140 H430 C475,140 500,110 500,60"/>
+  <path class="ln fk" d="M610,60 L730,170 H960"/>
+  <circle class="nd main" cx="60" cy="60" r="16"/>
+  <circle class="nd main" cx="170" cy="60" r="16"/>
+  <circle class="nd main" cx="280" cy="60" r="16"/>
+  <circle class="nd solid br" cx="500" cy="60" r="16"/>
+  <circle class="nd main" cx="610" cy="60" r="16"/>
+  <circle class="nd br" cx="350" cy="140" r="16"/>
+  <circle class="nd br" cx="420" cy="140" r="16"/>
+  <circle class="nd fk" cx="730" cy="170" r="16"/>
+  <circle class="nd fk" cx="845" cy="170" r="16"/>
+  <circle class="nd fk" cx="960" cy="170" r="16"/>
+  <text class="tag t-main start" x="44" y="22">commits</text>
+  <text class="tag t-br" x="385" y="190">branch</text>
+  <text class="tag t-br" x="500" y="22">merge</text>
+  <text class="tag t-fk end" x="652" y="136">fork</text>
+  <text class="cap" x="845" y="212">someone else's copy</text>
+</svg>
+```
+
+::: {.incremental}
+- Everything else, whether it's shell commands, working on GitHub desktop, filing issues, navigating pull requests, and on and on and on, are different ways of manipulating this same underlying process. 
+- This does not mean it's simple or easy. As projects grow in complexity or collaborators, it's not possible to keep the whole model in your head at once.
+- But if you can relate what you're doing to these diagrams, I think it's easier to keep your head on straight. 
+:::
+:::
+
+## Of course, this isn't really how work goes
+
+Life is messy. 
+
+::: {.incremental}
+1. **Defining one unit of work is hard.** 
+2. **Work isn't linear.**
+3. **Fallibility.**
+
+:::
+
+## Commit hell
+
+:::: {.columns}
+::: {.column width="45%"}
+These 3 problems tend to express themselves as:
+:::
+
+::: {.column width="55%"}
+::: {.gitlog}
+<div>typo</div>
+<div>does this</div>
+<div>does that</div>
+<div>typo</div>
+<div>no wait, it actually does this</div>
+<div>but I want that</div>
+<div>it is so over</div>
+:::
+:::
+::::
+
+::: {.fragment}
+::: {.caveat}
+This is... not ideal. Even if you recall what each commit did, they likely all represent the same piece of work. Committing often (with descriptive names) is good because it ensures that things don't get lost, but it adds clutter to your codebase. Clutter makes things worse for future you. 
+:::
+:::
+
+## So, how can we avoid this? {.section-slide .center}
+
+We can use something called a **squash & merge**!
+
+## A fresh data project
+
+Recently, I've spent some time cleaning up data from the Bureau of Labor Statistics' Quarterly Census of Employment and Wages dataset.
+
+```{=html}
+<svg class="git" viewBox="0 0 1000 325" role="img" aria-label="Main branch with one commit, and a branch called qcew_prep with commits C1 pull QCEW data from BLS API, C2 summarise wages in heat-exposed industries, C3 finalize join keys, and so on through CN">
+  <path class="ln gh" d="M136,70 H900"/>
+  <path class="ln br dash" d="M120,86 C120,160 160,200 240,200"/>
+  <path class="ln br" d="M240,200 H560"/>
+  <path class="ln br dash" d="M560,200 H800"/>
+  <circle class="nd main" cx="120" cy="70" r="16"/>
+  <circle class="nd gh" cx="400" cy="70" r="14"/>
+  <circle class="nd gh" cx="560" cy="70" r="14"/>
+  <circle class="nd gh" cx="720" cy="70" r="14"/>
+  <circle class="nd br" cx="240" cy="200" r="16"/>
+  <circle class="nd br" cx="400" cy="200" r="16"/>
+  <circle class="nd br" cx="560" cy="200" r="16"/>
+  <circle class="nd br" cx="800" cy="200" r="16"/>
+  <text class="tag t-main start" x="104" y="26">main</text>
+  <text class="cap start" x="150" y="112">quick analysis plan</text>
+  <text class="cap" x="560" y="30">could iterate here until I get it right…</text>
+  <text class="id" x="240" y="248">C1</text>
+  <text class="id" x="400" y="248">C2</text>
+  <text class="id" x="560" y="248">C3</text>
+  <text class="id" x="800" y="248">CN</text>
+  <text class="cap" x="240" y="274">pull QCEW data</text>
+  <text class="cap" x="240" y="295">from BLS API</text>
+  <text class="cap" x="400" y="274">summarise wages</text>
+  <text class="cap" x="400" y="295">in heat-exposed</text>
+  <text class="cap" x="400" y="316">industries</text>
+  <text class="cap" x="560" y="274">finalize join keys</text>
+  <text class="cap" x="800" y="274">…imagine several more commits</text>
+  <text class="cap" x="800" y="295">fiddling with these three tasks</text>
+  <text class="tag mono t-br start" x="836" y="207">qcew_prep</text>
+</svg>
+```
+
+Within this branch, I commit whatever, whenever, without much thought about a unit of work. I do this until I'm finished.
+
+::: {.notes}
+Let's start with a fresh data project, cleaning data from the BLS QCEW.
+
+Main branch: C1 is a quick analysis plan. C2 is QCEW prep... enter iterative commits until I get this right. There are ways to stay clean this way, but I have started to do something a little different.
+
+Branch called qcew_prep. Within this branch, I will commit whatever / whenever with not much thought about a unit of work. I'll do this until I'm finished.
+:::
+
+## Squash on the way back in
+
+Now I want to merge this back into main with a pull request, but I'd rather not have the messy commits on my main branch.
+
+```{=html}
+<svg class="git" viewBox="0 0 1000 310" role="img" aria-label="Commits C1 through CN on the branch are squashed into a single commit on main">
+  <path class="ln main" d="M120,70 H860"/>
+  <path class="ln br dash" d="M120,86 C120,180 160,230 240,230"/>
+  <rect class="box" x="204" y="194" width="552" height="72" rx="36"/>
+  <path class="ln br" d="M240,230 H720"/>
+  <path class="ln br" d="M756,230 C830,230 860,190 860,112"/>
+  <polygon class="head br" points="860,96 850,114 870,114"/>
+  <circle class="nd main" cx="120" cy="70" r="16"/>
+  <circle class="nd solid br" cx="860" cy="70" r="20"/>
+  <circle class="nd br" cx="240" cy="230" r="16"/>
+  <circle class="nd br" cx="400" cy="230" r="16"/>
+  <circle class="nd br" cx="560" cy="230" r="16"/>
+  <circle class="nd br" cx="720" cy="230" r="16"/>
+  <text class="tag t-main start" x="104" y="26">main</text>
+  <text class="cap" x="860" y="28">one commit, made of C1…CN</text>
+  <text class="tag t-br start" x="880" y="180">squash</text>
+  <text class="id" x="240" y="298">C1</text>
+  <text class="id" x="400" y="298">C2</text>
+  <text class="id" x="560" y="298">C3</text>
+  <text class="id" x="720" y="298">CN</text>
+</svg>
+```
+
+Squashing takes your pile of commits and smooshes them into **one**, which we can reword as needed on merge. While you can do this from the command line, I often find it easier using the pull request features on GitHub online.
+
+::: {.notes}
+Now, I want to merge this back into main using a pull request. But I'd really rather avoid having the messy commits in my main branch.
+
+What squashing does: takes your pile of commits C1-C2-C3-CN and smooshes them into 1 commit.
+
+This way, we'll have only 1 commit, which we can reformat as needed on merge. While you can do this from the command line, I often find it easier using the pull request features on GitHub online. 
+:::
+
+## The trade-off
+
+:::: {.columns}
+::: {.column width="50%"}
+::: {.tradeoff}
+[Advantage]{.card-title}
+
+
+Less clutter. We keep our commit history cleaner, so we keep our time machine cleaner.
+:::
+:::
+
+::: {.column width="50%"}
+::: {.tradeoff .con}
+[Disadvantage]{.card-title}
+
+
+If there are multiple commits you want to reference later, you will lose them.
+:::
+:::
+::::
+
+::: {.incremental}
+- What if you don't want to lose commits? **Just merge.**
+- What if you want some combo? **Interactive rebase.**
+:::
+
+## And what about AI agents? {.section-slide .center}
+
+Worktrees!
+
+## Working in parallel with the robots
+
+
+Imagine that you delegated data cleaning to an agent while you spent time preparing your modeling approach. With only the tools we've described thus far, neither of you have enough space to work in tandem.  
+
+```{=html}
+<svg class="git" viewBox="0 0 1000 235" role="img" aria-label="You edit prepare_outcome.R and an AI agent edits clean_qcew.R in the same project folder, which can only be on one branch at a time">
+  <defs>
+    <marker id="wt-arrow-1" viewBox="0 0 20 20" markerUnits="userSpaceOnUse" markerWidth="20" markerHeight="20" refX="4" refY="10" orient="auto">
+      <path class="head main" d="M2,2 L18,10 L2,18 Z"/>
+    </marker>
+  </defs>
+  <path class="folder" d="M390,62 V34 a12,12 0 0 1 12,-12 H470 l16,28 H598 a12,12 0 0 1 12,12 V148 a12,12 0 0 1 -12,12 H402 a12,12 0 0 1 -12,-12 Z"/>
+  <text class="cap" x="434" y="43">folder</text>
+  <text class="tag mono t-main" x="500" y="92">analysis/</text>
+  <text class="cap start" x="417" y="139">branch</text>
+  <path class="ln main" style="stroke-width:3" d="M488,132 H528"/>
+  <circle class="nd main" style="stroke-width:3" cx="508" cy="132" r="7"/>
+  <text class="tag t-main start" x="538" y="139">main</text>
+  <path class="ln main" marker-end="url(#wt-arrow-1)" d="M215,105 H362"/>
+  <path class="ln main" marker-end="url(#wt-arrow-1)" d="M785,105 H638"/>
+  <circle class="nd main" cx="150" cy="80" r="18"/>
+  <path class="ln main" d="M112,150 C112,110 188,110 188,150"/>
+  <path class="ln main" d="M850,62 V46"/>
+  <rect class="nd main" x="832" y="62" width="36" height="36" rx="7"/>
+  <path class="ln main" d="M812,150 C812,110 888,110 888,150"/>
+  <text class="tag t-main" x="150" y="186">you</text>
+  <text class="cap mono" x="150" y="214">build_model.R</text>
+  <text class="tag t-main" x="850" y="186">AI agent</text>
+  <text class="cap mono" x="850" y="214">clean_qcew.R</text>
+  <text class="tag t-mess" x="500" y="200">can't work on the same files at once</text>
+</svg>
+```
+
+::: {.notes}
+Everything so far assumed one person in one folder. Switching branches changes the files in that folder.
+
+Agentic AI tools edit files and run code on their own, sometimes for a long time. If the agent is working in the folder I'm working in, we're both changing the same set of files, on the same branch, at the same time. Even if we're in different scripts.
+
+A second branch doesn't fix this on its own. One folder can only have one branch checked out, so if either of us switches, the files change under the other.
+:::
+
+## A worktree is a second folder, on its own branch
+
+Within the same Git repository, a **worktree** gives your agent its own folder and its own branch. The agent can work in parallel with you, and nothing it does touches the files or your branch until you merge it.
+
+```{=html}
+<svg class="git" viewBox="0 0 1000 300" role="img" aria-label="One repository with two folders side by side: analysis on branch main where you work, and analysis_cleaning on branch clean_data where the agent works">
+  <rect class="box" x="330" y="14" width="340" height="76" rx="38"/>
+  <text class="tag t-br" x="500" y="48">one repository or project</text>
+  <text class="cap" x="500" y="74">one shared history of commits</text>
+  <path class="ln main" d="M430,92 L300,150"/>
+  <path class="ln br" d="M590,92 L800,150"/>
+  <path class="folder" d="M90,164 V136 a12,12 0 0 1 12,-12 H170 l16,28 H398 a12,12 0 0 1 12,12 V240 a12,12 0 0 1 -12,12 H102 a12,12 0 0 1 -12,-12 Z"/>
+  <path class="folder br" d="M590,164 V136 a12,12 0 0 1 12,-12 H670 l16,28 H898 a12,12 0 0 1 12,12 V240 a12,12 0 0 1 -12,12 H602 a12,12 0 0 1 -12,-12 Z"/>
+  <text class="cap" x="134" y="145">folder</text>
+  <text class="tag mono t-main" x="250" y="192">analysis/</text>
+  <text class="cap start" x="167" y="234">branch</text>
+  <path class="ln main" style="stroke-width:3" d="M238,227 H278"/>
+  <circle class="nd main" style="stroke-width:3" cx="258" cy="227" r="7"/>
+  <text class="tag t-main start" x="288" y="234">main</text>
+  <text class="cap" x="634" y="145">folder</text>
+  <text class="tag mono t-br" x="750" y="192">analysis_cleaning/</text>
+  <text class="cap start" x="627" y="234">branch</text>
+  <path class="ln br" style="stroke-width:3" d="M698,227 H738"/>
+  <circle class="nd br" style="stroke-width:3" cx="718" cy="227" r="7"/>
+  <text class="tag mono t-br start" x="748" y="234">clean_data</text>
+  <text class="tag t-main" x="250" y="288">you work here</text>
+  <text class="tag t-br" x="750" y="288">the agent works here</text>
+</svg>
+```
+
+::: {.cmd}
+[command line]{.cli} `git worktree add ../analysis_cleaning -b clean_data`
+:::
+
+::: {.notes}
+A worktree is just a second folder attached to the same repository. Each folder has its own branch checked out, so the agent's edits never touch the files I have opesn.
+
+It is not a second copy of the project's history. Commits made in either folder land in the same repository.
+
+Many agent tools will set up a worktree for you. This is what they are doing underneath.
+:::
+
+
+## Some unsolicited thoughts about AI
+
+::: {.incremental}
+- No consensus exists on the best way to use agents
+- This means that we're in a period of experimentation
+- Worktrees provide a tool to conduct those experiments safely and at your own pace
+:::
+
+
+
+
+## Takeaways
+
+:::: {.columns}
+::: {.column width="50%"}
+### Recap
+::: {.incremental}
+1. Git's underlying model and fundamental operations (**commits**, **branches**, **forks**)
+1. One method for keeping your project history a little cleaner (**squash & merge**)
+1. A method for working safely in tandem with agents (**worktrees**)
+:::
+:::
+
+::: {.column width="50%"}
+### Last thoughts
+::: {.incremental}
+1. This is how I like to work. You might find other methods (there are so many!) work better for you.
+2. The amount time you should spend fiddling with this stuff is task dependent.
+:::
+:::
+::::
