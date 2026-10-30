@@ -489,7 +489,7 @@ Now I want to merge this back into main with a pull request, but I'd rather not 
 </svg>
 ```
 
-Squashing takes your pile of commits and smooshes them into **one**, which we can reword as needed on merge. While you can do this from the command line, I often find it easier using the pull request features on GitHub online.
+Squashing takes your pile of commits and smooshes them into **one**, which we can reword as needed on merge. [Let's see this in action](https://github.com/joesimeone/weekly_forum_slides/pull/1)
 
 ::: {.notes}
 Now, I want to merge this back into main using a pull request. But I'd really rather avoid having the messy commits in my main branch.
